@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Star, ExternalLink, Copy, Check, Store } from 'lucide-react'
+import { Star, ExternalLink, Copy, Check } from 'lucide-react'
+import { MarketplaceAvatar } from './MarketplaceAvatar.jsx'
 
 function Stars({ rating }) {
   const full = Math.round(rating)
@@ -22,20 +23,39 @@ export function ProductCard({ product, averagePrice, style }) {
   const diffPercent = averagePrice > 0 ? Math.round((1 - product.price / averagePrice) * 100) : 0
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(product.sku)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(product.sku)
+      } else {
+        const textarea = document.createElement('textarea')
+        textarea.value = product.sku
+        textarea.style.position = 'fixed'
+        textarea.style.opacity = '0'
+        document.body.appendChild(textarea)
+        textarea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textarea)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // буфер обмена недоступен (например, небезопасный контекст) — молча игнорируем
+    }
   }
 
   return (
     <div
       style={style}
-      className="animate-card-in relative rounded-[20px] bg-white dark:bg-[#1C1C20] border border-black/5 dark:border-white/10
-                 p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]
-                 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+      className={`animate-card-in group relative rounded-[20px] bg-white dark:bg-[#1C1C20] border p-4
+                 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.1)]
+                 hover:-translate-y-1 transition-all duration-300 flex flex-col ${
+                   product.isBest
+                     ? 'border-[#FF9500]/40 ring-1 ring-[#FF9500]/20'
+                     : 'border-black/5 dark:border-white/10'
+                 }`}
     >
       {product.isBest && (
-        <span className="absolute top-3 left-3 z-10 bg-gradient-to-r from-[#FF9500] to-[#FF3B30] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
+        <span className="absolute top-3 left-3 z-10 bg-gradient-to-r from-[#FF9500] to-[#FF3B30] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm shadow-orange-500/30">
           🔥 Лучший выбор
         </span>
       )}
@@ -45,7 +65,7 @@ export function ProductCard({ product, averagePrice, style }) {
           src={product.image}
           alt={product.title}
           loading="lazy"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
       </div>
 
@@ -71,7 +91,7 @@ export function ProductCard({ product, averagePrice, style }) {
       </div>
 
       <div className="mt-2 flex items-center gap-1.5 text-[13px] text-gray-500 dark:text-gray-400">
-        <Store size={14} />
+        <MarketplaceAvatar name={product.marketplace} size={18} />
         <span>{product.marketplace}</span>
       </div>
 

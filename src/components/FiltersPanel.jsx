@@ -1,4 +1,6 @@
 import { marketplaces } from '../data/products.js'
+import { PriceRangeSlider } from './PriceRangeSlider.jsx'
+import { MarketplaceAvatar } from './MarketplaceAvatar.jsx'
 
 const SORT_OPTIONS = [
   { value: 'best', label: 'По умолчанию' },
@@ -39,18 +41,8 @@ export function FiltersPanel({
       </div>
 
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
-          Цена: {priceRange[0].toLocaleString('ru-RU')} ₽ – {priceRange[1].toLocaleString('ru-RU')} ₽
-        </p>
-        <input
-          type="range"
-          min={0}
-          max={maxPrice}
-          step={100}
-          value={priceRange[1]}
-          onChange={(e) => onPriceRangeChange([priceRange[0], Number(e.target.value)])}
-          className="w-full accent-[#007AFF]"
-        />
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">Цена</p>
+        <PriceRangeSlider value={priceRange} onChange={onPriceRangeChange} max={maxPrice} />
       </div>
 
       <div>
@@ -60,12 +52,13 @@ export function FiltersPanel({
             <button
               key={mp}
               onClick={() => onToggleMarketplace(mp)}
-              className={`px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors duration-150 ${
+              className={`flex items-center gap-1.5 pl-1.5 pr-3 py-1 rounded-full text-[13px] font-medium transition-colors duration-150 ${
                 selectedMarketplaces.includes(mp)
                   ? 'bg-[#007AFF] text-white'
                   : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20'
               }`}
             >
+              <MarketplaceAvatar name={mp} size={20} />
               {mp}
             </button>
           ))}
