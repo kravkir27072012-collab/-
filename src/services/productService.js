@@ -1,4 +1,5 @@
-import { products } from '../data/products.js'
+import { products, SEARCH_URLS, PREFIX } from '../data/products.js'
+import { searchProductsWithGemini } from './geminiService.js'
 
 const SEARCH_DELAY_MS = 500
 
@@ -36,18 +37,45 @@ export function averagePrice(items) {
   return items.reduce((sum, p) => sum + p.price, 0) / items.length
 }
 
+function mapGeminiItem(item, index) {
+  const prefix = PREFIX[item.marketplace] ?? 'XX'
+  const sku = `${prefix}-AI-${1000 + index}`
+  const buildUrl = SEARCH_URLS[item.marketplace]
+
+  return {
+    id: `gemini-${index}`,
+    title: item.title,
+    image: `https://source.unsplash.com/600x600/?${encodeURIComponent(item.imageQuery)}`,
+    price: Math.round(item.price),
+    rating: Math.round(item.rating * 10) / 10,
+    reviews: item.reviews,
+    marketplace: item.marketplace,
+    sku,
+    url: buildUrl ? buildUrl(item.title) : '#',
+  }
+}
+
 /**
- * Точка подключения реальных API маркетплейсов в будущем:
- * замените тело функции на запросы к Wildberries/Ozon/Yandex и
- * верните массив объектов с той же формой, что в data/products.js.
+ * "Мозг" поиска — Gemini генерирует список реалистичных предложений по
+ * запросу. При ошибке/пустом запросе используется локальный mock-каталог
+ * как фолбэк, чтобы сайт не падал без сети/ключа.
  */
 export async function fetchProducts(query) {
-  await new Promise((resolve) => setTimeout(resolve, SEARCH_DELAY_MS))
+  const normalized = query.trim()
 
-  const normalized = query.trim().toLowerCase()
-  const filtered = normalized
-    ? products.filter((p) => p.title.toLowerCase().includes(normalized))
-    : products
+  if (!normalized) {
+    await new Promise((resolve) => setTimeout(resolve, SEARCH_DELAY_MS))
+    return withBestPick(products)
+  }
 
-  return withBestPick(filtered)
+  try {
+    const items = await searchProductsWithGemini(normalized)
+    if (items.length === 0) throw new Error('Gemini вернул пустой список')
+    return withBestPick(items.map(mapGeminiItem))
+  } catch (err) {
+    console.warn('Gemini search failed, falling back to local catalog:', err)
+    const lowered = normalized.toLowerCase()
+    const filtered = products.filter((p) => p.title.toLowerCase().includes(lowered))
+    return withBestPick(filtered)
+  }
 }

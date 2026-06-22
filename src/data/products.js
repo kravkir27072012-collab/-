@@ -1,4 +1,4 @@
-const SEARCH_URLS = {
+export const SEARCH_URLS = {
   Wildberries: (q) => `https://www.wildberries.ru/catalog/0/search.aspx?search=${encodeURIComponent(q)}`,
   Ozon: (q) => `https://www.ozon.ru/search/?text=${encodeURIComponent(q)}`,
   'Яндекс.Маркет': (q) => `https://market.yandex.ru/search?text=${encodeURIComponent(q)}`,
@@ -6,7 +6,7 @@ const SEARCH_URLS = {
   AliExpress: (q) => `https://aliexpress.ru/wholesale?SearchText=${encodeURIComponent(q)}`,
 }
 
-const PREFIX = {
+export const PREFIX = {
   Wildberries: 'WB',
   Ozon: 'OZ',
   'Яндекс.Маркет': 'YM',
