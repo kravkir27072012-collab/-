@@ -98,11 +98,11 @@ export function ProductCard({ product, averagePrice, style }) {
       <div className="mt-4 pt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between gap-2">
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 text-[12px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          className="flex items-center gap-1 flex-1 min-w-0 text-[12px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
           title="Скопировать артикул"
         >
-          {copied ? <Check size={13} className="text-[#34C759]" /> : <Copy size={13} />}
-          <span>{copied ? 'Скопировано' : product.sku}</span>
+          {copied ? <Check size={13} className="shrink-0 text-[#34C759]" /> : <Copy size={13} className="shrink-0" />}
+          <span className="truncate">{copied ? 'Скопировано' : product.sku}</span>
         </button>
 
         <a
